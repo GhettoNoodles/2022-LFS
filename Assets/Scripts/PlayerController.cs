@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
+
         _movement.x = Input.GetAxis("Horizontal");
         _movement.z = Input.GetAxis("Vertical");
         _lookY = Input.GetAxis("Mouse X") * Time.deltaTime * xsens * 1000;
@@ -55,7 +57,25 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Danger"))
         {
-            Debug.Log("Dead");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            UIManager.Instance.damagePlayer();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Ring"))
+        {
+            //other.gameObject.GetComponent<Ring>().Use();
+            UIManager.Instance.IncreaseRings();
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag("Ring"))
+        {
+            Destroy(other.gameObject);
         }
     }
 }
