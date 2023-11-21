@@ -9,7 +9,6 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float acceleration;
     [SerializeField] private float maxVel;
-    public float tempmaxVel;
     [SerializeField] private float jumpForce;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform cam;
@@ -17,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform parent;
     [SerializeField] private float xsens;
     [SerializeField] private float ysens;
+    private float tempmaxVel;
     private bool _grounded;
     private float _lookX;
     private float _lookY;
