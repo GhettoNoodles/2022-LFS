@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float acceleration;
     [SerializeField] private float maxVel;
+    public float tempmaxVel;
     [SerializeField] private float jumpForce;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform cam;
@@ -24,16 +25,48 @@ public class PlayerController : MonoBehaviour
     private Vector3 _movement;
     private Vector3 _adjustedMovement;
 
+    private void Start()
+    {
+        tempmaxVel = maxVel;
+    }
+
     void Update()
     {
-        _grounded = Physics.Raycast(transform.position, Vector3.down, 2.8f);
-        if ((Input.GetButtonDown("Jump")) && _grounded)
+        Ray ray = new Ray(transform.position, Vector3.down);
+        RaycastHit hit;
+        _grounded = Physics.Raycast(ray, out hit, 2.66f);
+        if (_grounded)
         {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        }
+            if (Input.GetButtonDown("Jump"))
+            {
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
 
+            if (hit.collider.gameObject.CompareTag("Mud"))
+            {
+                if (rb.velocity.magnitude > 5f)
+                {
+                    rb.velocity = rb.velocity.normalized * 5f;
+                }
+                
+                maxVel = 5f;
+            }
+            else
+            {
+                maxVel = tempmaxVel;
+            }
+        }
+        else
+        {
+            maxVel = tempmaxVel;
+        }
         _movement.x = Input.GetAxis("Horizontal");
         _movement.z = Input.GetAxis("Vertical");
+        if (!_grounded)
+        {
+            _movement *= 0.5f;
+        }
+
         _lookY = Input.GetAxis("Mouse X") * Time.deltaTime * xsens * 1000;
         _lookX = Input.GetAxis("Mouse Y") * Time.deltaTime * ysens * 1000;
         _yRot += _lookY;
@@ -57,8 +90,7 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Danger"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-            UIManager.Instance.damagePlayer();
+            GameManager.Instance.DamagePlayer();
         }
     }
 
@@ -66,8 +98,7 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Ring"))
         {
-            //other.gameObject.GetComponent<Ring>().Use();
-            UIManager.Instance.IncreaseRings();
+            GameManager.Instance.IncreaseRings();
         }
     }
 
@@ -76,6 +107,10 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Ring"))
         {
             Destroy(other.gameObject);
+        }
+        else if (other.gameObject.CompareTag("Mud"))
+        {
+            maxVel = tempmaxVel;
         }
     }
 }
