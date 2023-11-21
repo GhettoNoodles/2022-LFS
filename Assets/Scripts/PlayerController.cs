@@ -90,6 +90,8 @@ public class PlayerController : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Danger"))
         {
+            rb.velocity *= 0;
+            rb.angularVelocity *= 0;
             GameManager.Instance.DamagePlayer();
         }
     }
@@ -99,6 +101,15 @@ public class PlayerController : MonoBehaviour
         if (other.gameObject.CompareTag("Ring"))
         {
             GameManager.Instance.IncreaseRings();
+        }
+        else if (other.gameObject.CompareTag("CP"))
+        {
+            Checkpoint cp = other.gameObject.GetComponent<Checkpoint>();
+            if (!cp.GetIsActive())
+            {
+                cp.Activate();
+                
+            }
         }
     }
 

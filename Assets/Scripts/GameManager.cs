@@ -9,10 +9,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private UIManager uiManager;
     [SerializeField] private int startHP;
     [SerializeField] private GameObject player;
-    private Vector3 startPos;
+    private Checkpoint activeCP;
     private int _rings;
     private int _currentHP;
 
+    public void SetActiveCP(Checkpoint cp)
+    {
+        activeCP = cp;
+    }
     private void Awake()
     {
         Instance = this;
@@ -21,7 +25,6 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         _currentHP = startHP;
-        startPos = player.transform.position;
         uiManager.SetHealth(_currentHP);
         uiManager.SetRing(_rings);
     }
@@ -42,7 +45,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            player.transform.position = startPos;
+            player.transform.position = activeCP.GetPosition();
+            activeCP.Spawn();
         }
     }
 
