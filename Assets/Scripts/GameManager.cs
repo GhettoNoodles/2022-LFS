@@ -35,13 +35,18 @@ public class GameManager : MonoBehaviour
         uiManager.SetRing(_rings);
     }
 
+    public int GetRings()
+    {
+        return _rings;
+    }
+
     public void DamagePlayer()
     {
         _currentHP--;
         uiManager.SetHealth(_currentHP);
         if (_currentHP <= 0)
         {
-            Debug.Log("Game Over");
+            EndGame(false);
         }
         else
         {
@@ -50,8 +55,31 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void StartGame()
+    public void PauseGame()
     {
-        SceneManager.LoadScene(1);
+        Time.timeScale = 0;
+        uiManager.PauseScreen();
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1;
+        uiManager.GameScreen();
+    }
+
+    public void EndGame(bool victory)
+    {
+        Time.timeScale = 0;
+        uiManager.GameOverScreen(victory);
+    }
+    public void ResetGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        Time.timeScale = 1;
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

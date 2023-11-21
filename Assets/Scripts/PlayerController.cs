@@ -32,48 +32,57 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        Ray ray = new Ray(transform.position, Vector3.down);
-        RaycastHit hit;
-        _grounded = Physics.Raycast(ray, out hit, 2.66f);
-        if (_grounded)
-        {
-            if (Input.GetButtonDown("Jump"))
+        
+
+            if (Input.GetButtonDown("Pause"))
             {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                GameManager.Instance.PauseGame();
             }
 
-            if (hit.collider.gameObject.CompareTag("Mud"))
+            Ray ray = new Ray(transform.position, Vector3.down);
+            RaycastHit hit;
+            _grounded = Physics.Raycast(ray, out hit, 2.66f);
+            if (_grounded)
             {
-                if (rb.velocity.magnitude > 5f)
+                if (Input.GetButtonDown("Jump"))
                 {
-                    rb.velocity = rb.velocity.normalized * 5f;
+                    rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 }
-                
-                maxVel = 5f;
+
+                if (hit.collider.gameObject.CompareTag("Mud"))
+                {
+                    if (rb.velocity.magnitude > 5f)
+                    {
+                        rb.velocity = rb.velocity.normalized * 5f;
+                    }
+
+                    maxVel = 5f;
+                }
+                else
+                {
+                    maxVel = tempmaxVel;
+                }
             }
             else
             {
                 maxVel = tempmaxVel;
             }
-        }
-        else
-        {
-            maxVel = tempmaxVel;
-        }
-        _movement.x = Input.GetAxis("Horizontal");
-        _movement.z = Input.GetAxis("Vertical");
-        if (!_grounded)
-        {
-            _movement *= 0.5f;
-        }
 
-        _lookY = Input.GetAxis("Mouse X") * Time.deltaTime * xsens * 1000;
-        _lookX = Input.GetAxis("Mouse Y") * Time.deltaTime * ysens * 1000;
-        _yRot += _lookY;
-        _xRot -= _lookX;
-        _xRot = Mathf.Clamp(_xRot, -90f, 90f);
-        cam.rotation = Quaternion.Euler(_xRot, 0, 0);
-        cameraOrbit.rotation = Quaternion.Euler(0, _yRot, 0);
+            _movement.x = Input.GetAxis("Horizontal");
+            _movement.z = Input.GetAxis("Vertical");
+            if (!_grounded)
+            {
+                _movement *= 0.5f;
+            }
+
+            _lookY = Input.GetAxis("Mouse X") * Time.deltaTime * xsens * 1000;
+            _lookX = Input.GetAxis("Mouse Y") * Time.deltaTime * ysens * 1000;
+            _yRot += _lookY;
+            _xRot -= _lookX;
+            _xRot = Mathf.Clamp(_xRot, -90f, 90f);
+            cam.rotation = Quaternion.Euler(_xRot, 0, 0);
+            cameraOrbit.rotation = Quaternion.Euler(0, _yRot, 0);
+        
     }
 
     private void FixedUpdate()
@@ -93,6 +102,10 @@ public class PlayerController : MonoBehaviour
             rb.velocity *= 0;
             rb.angularVelocity *= 0;
             GameManager.Instance.DamagePlayer();
+        }
+        else if (other.gameObject.CompareTag("Fin"))
+        {
+            GameManager.Instance.EndGame(true);
         }
     }
 

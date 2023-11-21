@@ -3,20 +3,55 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private GameObject infoPanel;
+    [SerializeField] private GameObject gamePanel;
+    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private GameObject endGamePanel;
+    [SerializeField] private GameObject pauseSF;
+    [SerializeField] private GameObject gameOverSF;
     [SerializeField] private TextMeshProUGUI ringsText;
     [SerializeField] private TextMeshProUGUI healthText;
-    
+    [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI resultText;
+
 
     public void SetRing(int rings)
     {
         ringsText.text = "Rings :" + rings;
-    }public void SetHealth(int hp)
+    }
+
+    public void SetHealth(int hp)
     {
         healthText.text = "HP :" + hp;
     }
-    
+
+    public void PauseScreen()
+    {
+        pausePanel.SetActive(true);
+        gamePanel.SetActive(false);
+        endGamePanel.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(pauseSF);
+    }
+
+    public void GameScreen()
+    {
+        pausePanel.SetActive(false);
+        gamePanel.SetActive(true);
+        endGamePanel.SetActive(false);
+    }
+
+    public void GameOverScreen(bool victory)
+    {
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(gameOverSF);
+        resultText.text = victory ? "You Win!" : "You Lose.";
+        scoreText.text = "Score: " + GameManager.Instance.GetRings();
+        pausePanel.SetActive(false);
+        gamePanel.SetActive(false);
+        endGamePanel.SetActive(true);
+    }
 }
