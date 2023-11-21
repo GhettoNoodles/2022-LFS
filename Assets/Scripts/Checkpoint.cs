@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
@@ -16,10 +13,13 @@ public class Checkpoint : MonoBehaviour
     private void Start()
     {
         position = gameObject.transform.position;
+        
+        //Setup Starting point as Checkpoint
         if (prevCP == this)
         {
             GameManager.Instance.SetActiveCP(this);
             particlesIdle= Instantiate(vfxIdle,position,Quaternion.identity);
+            particlesIdle= Instantiate(vfxSpawn,position,Quaternion.identity);
             isActive = true;
         }
     }
@@ -35,25 +35,26 @@ public class Checkpoint : MonoBehaviour
 
     public void Spawn()
     {
+        // Particle VFX for player respawn
         Instantiate(vfxSpawn,position,Quaternion.identity);
     }
     public void Activate()
     {
+        //Activate this checkpoint and Deactivate previous Checkpoint
         if (!nextCP.GetIsActive()||nextCP == this)
         {
-            Debug.Log("Activating " + gameObject.name);
             GameManager.Instance.SetActiveCP(this);
             isActive = true;
             prevCP.Deactivate();
             particlesIdle= Instantiate(vfxIdle,position,Quaternion.identity);
+            particlesIdle= Instantiate(vfxSpawn,position,Quaternion.identity);
         }
     }
 
     public void Deactivate()
     {
         isActive = false;
-        Debug.Log("Deactivating " + gameObject.name);
-        Destroy(particlesIdle);
+        Destroy(particlesIdle); //cleans up particles
     }
     
 

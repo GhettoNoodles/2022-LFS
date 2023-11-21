@@ -1,19 +1,21 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Ring : MonoBehaviour
 {
     [SerializeField] float destroyTime;
-    
-    public void Use()
-    {
-        StartCoroutine(DestroyDelay());
-    }
+    [SerializeField] GameObject vfx;
     IEnumerator DestroyDelay()
     {
         yield return new WaitForSeconds(destroyTime);
+        Destroy(gameObject);
+    }
+
+    public void Use()
+    {
+        //VFX, AFX 
+        Instantiate(vfx,gameObject.transform.position,Quaternion.identity);
+        //StartCoroutine(DestroyDelay());
         Destroy(gameObject);
     }
 }

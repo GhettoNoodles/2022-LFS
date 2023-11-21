@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,12 +17,12 @@ public class UIManager : MonoBehaviour
 
     public void SetRing(int rings)
     {
-        ringsText.text = "Rings :" + rings;
+        ringsText.text = "Rings: " + rings;
     }
 
     public void SetHealth(int hp)
     {
-        healthText.text = "HP :" + hp;
+        healthText.text = "HP: " + hp;
     }
 
     public void PauseScreen()
@@ -48,8 +45,14 @@ public class UIManager : MonoBehaviour
     {
         EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(gameOverSF);
+        int rings = GameManager.Instance.GetRings();
+        int hp = GameManager.Instance.GetHP();
+        
+        //Format Score for EndGame
         resultText.text = victory ? "You Win!" : "You Lose.";
-        scoreText.text = "Score: " + GameManager.Instance.GetRings();
+        scoreText.text = "Rings:\t" + rings
+            + "\nHP:\t\t"+ hp +" x 4\nTotal:\t"+(rings+4*hp);
+        
         pausePanel.SetActive(false);
         gamePanel.SetActive(false);
         endGamePanel.SetActive(true);

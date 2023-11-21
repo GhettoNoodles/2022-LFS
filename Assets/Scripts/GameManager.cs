@@ -1,7 +1,5 @@
-using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,11 +10,7 @@ public class GameManager : MonoBehaviour
     private Checkpoint activeCP;
     private int _rings;
     private int _currentHP;
-
-    public void SetActiveCP(Checkpoint cp)
-    {
-        activeCP = cp;
-    }
+    
     private void Awake()
     {
         Instance = this;
@@ -28,7 +22,10 @@ public class GameManager : MonoBehaviour
         uiManager.SetHealth(_currentHP);
         uiManager.SetRing(_rings);
     }
-
+    public void SetActiveCP(Checkpoint cp)
+    {
+        activeCP = cp;
+    }
     public void IncreaseRings()
     {
         _rings++;
@@ -39,7 +36,7 @@ public class GameManager : MonoBehaviour
     {
         return _rings;
     }
-
+    
     public void DamagePlayer()
     {
         _currentHP--;
@@ -50,9 +47,14 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            //Respawn player
             player.transform.position = activeCP.GetPosition();
             activeCP.Spawn();
         }
+    }
+    public int GetHP()
+    {
+        return _currentHP;
     }
 
     public void PauseGame()
