@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class AudioManager : MonoBehaviour
 {
@@ -27,11 +23,11 @@ public class AudioManager : MonoBehaviour
         bgMusic.mute = false;
     }
 
-
     public void Bounce(float volume)
     {
         ballAudioSrc.PlayOneShot(bounceClip,volume);
-    }public void Burn()
+    }
+    public void Burn()
     {
         ballAudioSrc.PlayOneShot(sizzle,0.3f);
     }
@@ -39,14 +35,20 @@ public class AudioManager : MonoBehaviour
     public void Ring()
     {
         ballAudioSrc.PlayOneShot(ringCollect,0.5f);
-    }public void Mud()
+    }
+    
+    public void Mud()
     {
         ballAudioSrc.PlayOneShot(mud,0.5f);
-    }public void Win()
+    }
+    
+    public void Win()
     {
         ballAudioSrc.PlayOneShot(victory,0.5f);
         bgMusic.mute = true;
-    }public void Lose()
+    }
+    
+    public void Lose()
     {
         ballAudioSrc.PlayOneShot(lose,0.5f);
         bgMusic.mute = true;

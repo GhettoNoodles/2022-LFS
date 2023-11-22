@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -10,9 +11,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform cam;
     [SerializeField] private Transform cameraOrbit;
     [SerializeField] private Transform parent;
-    [SerializeField] private float xsens;
-    [SerializeField] private float ysens;
-    private float tempmaxVel;
+    [SerializeField] private float lookSensitivity;
+    [SerializeField] private float coyoteTime;
+    [SerializeField] private float jumpBufferTime;
+    private float _tempMaxVel;
+    private float _coyoteTimeCounter;
+    private float _jumpBufferCounter;
     private bool _grounded;
     private float _lookX;
     private float _lookY;
@@ -23,7 +27,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        tempmaxVel = maxVel;
+        _tempMaxVel = maxVel;
     }
 
     void Update()
@@ -32,17 +36,16 @@ public class PlayerController : MonoBehaviour
         {
             GameManager.Instance.PauseGame();
         }
+
         //Check that player can jump
         Ray ray = new Ray(transform.position, Vector3.down);
         RaycastHit hit;
-        _grounded = Physics.Raycast(ray, out hit, 2.66f);
+        _grounded = Physics.Raycast(ray, out hit, 1.8f);
+
         if (_grounded)
         {
-            //jump
-            if (Input.GetButtonDown("Jump"))
-            {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            }
+            _coyoteTimeCounter = coyoteTime;
+            
             //Slows down if player touches mud
             if (hit.collider.gameObject.CompareTag("Mud"))
             {
@@ -55,14 +58,32 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                maxVel = tempmaxVel; //returns max velocity to normal value
+                maxVel = _tempMaxVel; //returns max velocity to normal value
             }
         }
         else
         {
-            maxVel = tempmaxVel; //returns max velocity if mid air
+            _coyoteTimeCounter -= Time.deltaTime;
+            maxVel = _tempMaxVel; //returns max velocity if mid air
         }
-        
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            _jumpBufferCounter = jumpBufferTime;
+        }
+        else
+        {
+            _jumpBufferCounter -= Time.deltaTime;
+        }
+
+        if (_coyoteTimeCounter > 0 && _jumpBufferCounter > 0) 
+        {
+            //jump
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            _coyoteTimeCounter = 0;
+            _jumpBufferCounter = 0;
+        }
+
         //Player movement input
         _movement.x = Input.GetAxis("Horizontal");
         _movement.z = Input.GetAxis("Vertical");
@@ -70,18 +91,11 @@ public class PlayerController : MonoBehaviour
         {
             _movement *= 0.5f; //airspeed
         }
-        
+
         //player looking input (Uses controller joystick Only)
-        _lookY = Input.GetAxis("Mouse X") * Time.deltaTime * xsens * 1000;
-        _lookX = Input.GetAxis("Mouse Y") * Time.deltaTime * ysens * 1000;
+        _lookY = Input.GetAxis("Mouse X") * Time.deltaTime * lookSensitivity * 1000;
         _yRot += _lookY;
-        _xRot -= _lookX;
-        _xRot = Mathf.Clamp(_xRot, -90f, 90f);
-        
-        //adjust camera to look
-        cam.rotation = Quaternion.Euler(_xRot, 0, 0);
         cameraOrbit.rotation = Quaternion.Euler(0, _yRot, 0);
-        
     }
 
     private void FixedUpdate()
@@ -113,7 +127,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            AudioManager.Instance.Bounce(rb.velocity.y/10); //bounce sound
+            AudioManager.Instance.Bounce(rb.velocity.y / 10); //bounce sound
         }
     }
 
@@ -133,6 +147,4 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
-    
 }

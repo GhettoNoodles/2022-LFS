@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
     public void EndGame(bool victory)
     {
         Time.timeScale = 0;
+        //Play Audios
         if (victory)
         {
             AudioManager.Instance.Win();   
@@ -82,6 +83,7 @@ public class GameManager : MonoBehaviour
         {
             AudioManager.Instance.Lose();
         }
+        
         uiManager.GameOverScreen(victory);
     }
     public void ResetGame()
