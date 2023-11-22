@@ -50,8 +50,8 @@ public class UIManager : MonoBehaviour
         
         //Format Score for EndGame
         resultText.text = victory ? "You Win!" : "You Lose.";
-        scoreText.text = "Rings:\t" + rings
-            + "\nHP:\t\t"+ hp +" x 4\nTotal:\t"+(rings+4*hp);
+        scoreText.text = "<#FF9500>Rings:\t" + rings
+            + "\n<#8C0000>HP:\t\t"+ hp +" x 4\n<#000000>Total:\t"+(rings+4*hp);
         
         pausePanel.SetActive(false);
         gamePanel.SetActive(false);
