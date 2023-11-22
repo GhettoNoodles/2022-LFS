@@ -6,6 +6,7 @@ public class Checkpoint : MonoBehaviour
     [SerializeField] private Checkpoint prevCP;
     [SerializeField] private GameObject vfxIdle;
     [SerializeField] private GameObject vfxSpawn;
+    [SerializeField] private AudioSource cpAudioSrc;
     private GameObject particlesIdle;
     private Vector3 position;
     private bool isActive;
@@ -17,6 +18,7 @@ public class Checkpoint : MonoBehaviour
         //Setup Starting point as Checkpoint
         if (prevCP == this)
         {
+            AudioManager.Instance.CpActivate(cpAudioSrc);
             GameManager.Instance.SetActiveCP(this);
             particlesIdle= Instantiate(vfxIdle,position,Quaternion.identity);
             particlesIdle= Instantiate(vfxSpawn,position,Quaternion.identity);
@@ -43,6 +45,7 @@ public class Checkpoint : MonoBehaviour
         //Activate this checkpoint and Deactivate previous Checkpoint
         if (!nextCP.GetIsActive()||nextCP == this)
         {
+            AudioManager.Instance.CpActivate(cpAudioSrc);
             GameManager.Instance.SetActiveCP(this);
             isActive = true;
             prevCP.Deactivate();

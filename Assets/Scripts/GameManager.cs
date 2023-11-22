@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -41,6 +42,7 @@ public class GameManager : MonoBehaviour
     {
         _currentHP--;
         uiManager.SetHealth(_currentHP);
+        AudioManager.Instance.Burn();
         if (_currentHP <= 0)
         {
             EndGame(false);
@@ -72,6 +74,14 @@ public class GameManager : MonoBehaviour
     public void EndGame(bool victory)
     {
         Time.timeScale = 0;
+        if (victory)
+        {
+            AudioManager.Instance.Win();   
+        }
+        else
+        {
+            AudioManager.Instance.Lose();
+        }
         uiManager.GameOverScreen(victory);
     }
     public void ResetGame()

@@ -14,6 +14,7 @@ public class Ring : MonoBehaviour
     public void Use()
     {
         //VFX, AFX 
+        AudioManager.Instance.Ring();
         Instantiate(vfx,gameObject.transform.position,Quaternion.identity);
         //StartCoroutine(DestroyDelay());
         Destroy(gameObject);

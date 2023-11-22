@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
@@ -102,9 +103,17 @@ public class PlayerController : MonoBehaviour
             rb.angularVelocity *= 0;
             GameManager.Instance.DamagePlayer();
         }
-        else if (other.gameObject.CompareTag("Fin"))//Check for Finish
+        else if (other.gameObject.CompareTag("Fin")) //Check for Finish
         {
             GameManager.Instance.EndGame(true);
+        }
+        else if (other.gameObject.CompareTag("Mud")) //check for Mud sound
+        {
+            AudioManager.Instance.Mud();
+        }
+        else
+        {
+            AudioManager.Instance.Bounce(rb.velocity.y/10); //bounce sound
         }
     }
 
