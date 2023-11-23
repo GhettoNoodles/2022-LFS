@@ -1,33 +1,44 @@
+using System;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float acceleration;
-    [SerializeField] private float maxVel;
-    [SerializeField] private float jumpForce;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform cam;
     [SerializeField] private Transform cameraOrbit;
     [SerializeField] private Transform parent;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float maxVel;
+    [SerializeField] private float jumpForce;
     [SerializeField] private float lookSensitivity;
     [SerializeField] private float coyoteTime;
     [SerializeField] private float jumpBufferTime;
+    [SerializeField] private float jumpCooldownTime;
+    
+    private bool _grounded;
+    private bool _muddy;
+    
     private float _tempMaxVel;
     private float _coyoteTimeCounter;
     private float _jumpBufferCounter;
-    private bool _grounded;
+    private float _jumpCooldownCounter;
     private float _lookX;
-    private float _lookY;
+    private float _mouseY;
+    private float _controllerY;
     private float _xRot;
     private float _yRot;
+    
     private Vector3 _movement;
     private Vector3 _adjustedMovement;
+    private LayerMask groundMask;
 
     private void Start()
     {
         _tempMaxVel = maxVel;
+        groundMask = LayerMask.GetMask("Ground");
     }
 
     void Update()
@@ -37,19 +48,21 @@ public class PlayerController : MonoBehaviour
             GameManager.Instance.PauseGame();
         }
 
+        if (_jumpCooldownCounter>0f)
+        {
+            _jumpCooldownCounter -= Time.deltaTime;
+        }
         //Check that player can jump
-        Ray ray = new Ray(transform.position, Vector3.down);
-        RaycastHit hit;
-        _grounded = Physics.Raycast(ray, out hit, 1.8f);
+        _grounded = Physics.CheckSphere(transform.position,3f, groundMask);
 
         if (_grounded)
         {
             _coyoteTimeCounter = coyoteTime;
             
             //Slows down if player touches mud
-            if (hit.collider.gameObject.CompareTag("Mud"))
+            if (_muddy)
             {
-                if (rb.velocity.magnitude > 5f)
+                if (rb.velocity.z+rb.velocity.x > 5f)
                 {
                     rb.velocity = rb.velocity.normalized * 5f;
                 }
@@ -75,13 +88,16 @@ public class PlayerController : MonoBehaviour
         {
             _jumpBufferCounter -= Time.deltaTime;
         }
-
-        if (_coyoteTimeCounter > 0 && _jumpBufferCounter > 0) 
+        
+        if (_coyoteTimeCounter > 0 && _jumpBufferCounter > 0&& _jumpCooldownCounter<0.1f)
         {
-            //jump
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            //Reset Jump modifiers
             _coyoteTimeCounter = 0;
             _jumpBufferCounter = 0;
+            _jumpCooldownCounter = jumpCooldownTime;
+            
+            //jump
+            rb.AddForce(Vector3.up * jumpForce,ForceMode.Impulse);
         }
 
         //Player movement input
@@ -92,9 +108,18 @@ public class PlayerController : MonoBehaviour
             _movement *= 0.5f; //airspeed
         }
 
-        //player looking input (Uses controller joystick Only)
-        _lookY = Input.GetAxis("Mouse X") * Time.deltaTime * lookSensitivity * 1000;
-        _yRot += _lookY;
+        //player looking input
+        _mouseY = Input.GetAxis("Mouse X") * Time.deltaTime * lookSensitivity * 1000;
+        _controllerY = Input.GetAxis("Controller X") * Time.deltaTime * lookSensitivity * 1000;
+        if (Math.Abs(_mouseY) > Math.Abs(_controllerY))
+        {
+            _yRot += _mouseY;
+        }
+        else
+        {
+            _yRot += _controllerY;
+        }
+
         cameraOrbit.rotation = Quaternion.Euler(0, _yRot, 0);
     }
 
@@ -105,7 +130,7 @@ public class PlayerController : MonoBehaviour
         _adjustedMovement = parent.TransformDirection(_movement);
         if (rb.velocity.magnitude < maxVel)
         {
-            rb.AddForce(_adjustedMovement * acceleration, ForceMode.Acceleration);
+            rb.AddForce(_adjustedMovement * moveSpeed,ForceMode.Force);
         }
     }
 
@@ -124,12 +149,22 @@ public class PlayerController : MonoBehaviour
         else if (other.gameObject.CompareTag("Mud")) //check for Mud sound
         {
             AudioManager.Instance.Mud();
+            _muddy = true;
         }
         else
         {
-            AudioManager.Instance.Bounce(rb.velocity.y / 10); //bounce sound
+            AudioManager.Instance.Bounce(rb.velocity.y / maxVel); //bounce sound
         }
     }
+
+    private void OnCollisionExit(Collision other)
+    {
+        if (other.gameObject.CompareTag("Mud")) //check for Mud sound
+        {
+            _muddy = false;
+        }
+    }
+    
 
     private void OnTriggerEnter(Collider other)
     {
