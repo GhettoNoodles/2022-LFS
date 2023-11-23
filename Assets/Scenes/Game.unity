@@ -2380,7 +2380,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed2b1d9bcba978b49a409c1cce1192b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyTime: 0
   vfx: {fileID: 0}
 --- !u!43 &299347034
 Mesh:
@@ -9595,6 +9594,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5984490082197533109, guid: ec3e8f3ed27e2244caaedaf589590a03, type: 3}
+      propertyPath: jumpCooldownTime
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5984490082197533109, guid: ec3e8f3ed27e2244caaedaf589590a03, type: 3}
       propertyPath: _jumpCooldownTime
       value: 0.5
       objectReference: {fileID: 0}
@@ -11507,7 +11510,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed2b1d9bcba978b49a409c1cce1192b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyTime: 0
   vfx: {fileID: 0}
 --- !u!4 &903190001 stripped
 Transform:
