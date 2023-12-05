@@ -7,6 +7,7 @@ public class Checkpoint : MonoBehaviour
     [SerializeField] private GameObject vfxIdle;
     [SerializeField] private GameObject vfxSpawn;
     [SerializeField] private AudioSource cpAudioSrc;
+    public int cpNum;
     private GameObject particlesIdle;
     private Vector3 position;
     private bool isActive;
@@ -56,8 +57,12 @@ public class Checkpoint : MonoBehaviour
 
     public void Deactivate()
     {
-        isActive = false;
-        Destroy(particlesIdle); //cleans up particles
+        if (isActive)
+        {
+            isActive = false;
+            Destroy(particlesIdle); //cleans up particles
+        }
+        
     }
     
 
