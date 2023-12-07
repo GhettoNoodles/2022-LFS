@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -10,6 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private UIManager uiManager;
     [SerializeField] private int startHP;
     [SerializeField] private GameObject player;
+    [SerializeField] private Rigidbody playerRB;
     [SerializeField] private GameObject ringPrefab;
     [SerializeField] private List<Vector3> ringPositions;
     [SerializeField] private List<Vector3> ringRotations;
@@ -17,10 +19,11 @@ public class GameManager : MonoBehaviour
 
     public List<Ring> _rings;
     private Checkpoint _activeCp;
+    private Checkpoint _defaultCp;
     private int _ringsCollected;
     private int _currentHP;
-    public int saveNum;
     public int ringAmt;
+    private GameState defaultGameState;
 
     private void Awake()
     {
@@ -31,13 +34,28 @@ public class GameManager : MonoBehaviour
         else
         {
             Instance = this;
+            ringAmt = ringPositions.Count;
+            bool[] temp =new bool[ringAmt];
+            Array.Fill(temp, true);
+            defaultGameState = new GameState();
+            defaultGameState.ringStates = temp;
+            defaultGameState.playerPos = player.transform.position;
+            defaultGameState.playerRings = 0;
+            defaultGameState.playerHP = startHP;
+            defaultGameState.activeCP = 0;
+            defaultGameState.playerVelocity = Vector3.zero;
         }
-
-        ringAmt = ringPositions.Count;
     }
 
     private void Start()
     {
+        Time.timeScale = 0f;
+        uiManager.MainMenu();
+    }
+
+    public void StartGame()
+    {
+        Time.timeScale = 1f;
         _currentHP = startHP;
         uiManager.SetHealth(_currentHP);
         uiManager.SetRing(_ringsCollected);
@@ -46,6 +64,8 @@ public class GameManager : MonoBehaviour
             var temp = Instantiate(ringPrefab, ringPositions[i], Quaternion.Euler(ringRotations[i]));
             _rings.Add(temp.GetComponent<Ring>());
         }
+
+        uiManager.GameScreen();
     }
 
     public void SetActiveCP(Checkpoint cp)
@@ -66,6 +86,7 @@ public class GameManager : MonoBehaviour
 
     public void SaveGame()
     {
+        uiManager.Save();
         bool[] ringStates = new bool[ringAmt];
         for (int i = 0; i < ringAmt; i++)
         {
@@ -73,30 +94,37 @@ public class GameManager : MonoBehaviour
         }
 
         SaveManager.Instance.SaveGame(_activeCp.cpNum, ringStates, player.transform.position, _ringsCollected,
-            _currentHP);
+            _currentHP,playerRB.velocity);
     }
 
-    public void LoadGame()
+    public void LoadButton()
     {
-        GameState gs = SaveManager.Instance.readGameStateFromFile(uiManager.GetSelectedSave());
+        LoadGame(SaveManager.Instance.readGameStateFromFile(uiManager.GetSelectedSave()));
+    }
+    public void LoadGame(GameState gs)
+    {
         //hp
         _currentHP = gs.playerHP;
         uiManager.SetHealth(_currentHP);
         //cp
-        _activeCp.Deactivate();
+        foreach (var checkpoint in checkpoints)
+        {
+            checkpoint.Deactivate();
+        }
         _activeCp = checkpoints[gs.activeCP];
         _activeCp.Activate();
         //rings
         for (int i = 0; i < ringAmt; i++)
-        { 
+        {
             _rings[i].gameObject.SetActive(gs.ringStates[i]);
         }
 
         _ringsCollected = gs.playerRings;
         uiManager.SetRing(_ringsCollected);
-
+        
         //player
         player.transform.position = gs.playerPos;
+        playerRB.velocity = gs.playerVelocity;
         ResumeGame();
         uiManager.GameScreen();
     }
@@ -153,8 +181,7 @@ public class GameManager : MonoBehaviour
 
     public void ResetGame()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        Time.timeScale = 1;
+        LoadGame(defaultGameState);
     }
 
     public void QuitGame()

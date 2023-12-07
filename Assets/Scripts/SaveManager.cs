@@ -11,8 +11,9 @@ using UnityEngine.Serialization;
 public class GameState
 {
     [JsonProperty("active_cp")] public int activeCP;
-    [JsonProperty("ring_transforms")] public bool[] ringStates = new bool[8];
+    [JsonProperty("ring_transforms")] public bool[] ringStates;
     [JsonProperty("player_position")] public Vector3 playerPos;
+    [JsonProperty("player_velocity")] public Vector3 playerVelocity;
     [JsonProperty("player_rings")] public int playerRings;
     [JsonProperty("player_hp")] public int playerHP;
 }
@@ -20,7 +21,6 @@ public class GameState
 public class SaveManager : MonoBehaviour
 {
     public static SaveManager Instance;
-    private int saveNum;
     public string dataPath = "";
     public string savesListPath = "";
     private GameState _gameState = new GameState();
@@ -45,7 +45,7 @@ public class SaveManager : MonoBehaviour
         }
         else
         {
-            string jsonData = System.IO.File.ReadAllText(savesListPath);
+            string jsonData = File.ReadAllText(savesListPath);
             saves = JsonConvert.DeserializeObject<List<string>>(jsonData);
         }
 
@@ -55,17 +55,16 @@ public class SaveManager : MonoBehaviour
 
 
     public void SaveGame(int activeCheckpoint, bool[] rings, Vector3 playerPos,
-        int ringsCollected, int playerHP)
+        int ringsCollected, int playerHP,Vector3 playVel)
     {
         string saveName = DateTime.Now.ToString("yyyy-MM-dd_H-mm-ss");
-        //saveName= saveName.Replace(' ', '_');
-        //saveName = saveName.Replace('\\', '-');
         dataPath = Application.persistentDataPath + "/" + "game_save_" + saveName + ".json";
        
         Debug.Log("DATA PATH: " + dataPath);
         //checkpoints
         _gameState.activeCP = activeCheckpoint;
         //rings
+        _gameState.ringStates = new bool[GameManager.Instance.ringAmt];
         for (int i = 0; i < GameManager.Instance.ringAmt; i++)
         {
             _gameState.ringStates[i] = rings[i];
@@ -73,18 +72,19 @@ public class SaveManager : MonoBehaviour
 
         //playerpos
         _gameState.playerPos = playerPos;
+        _gameState.playerVelocity = playVel;
         _gameState.playerRings = ringsCollected;
         _gameState.playerHP = playerHP;
         string output = JsonConvert.SerializeObject(_gameState, new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         });
-        System.IO.File.WriteAllText(dataPath, output);
+        File.WriteAllText(dataPath, output);
         if (!saves.Contains(saveName))
         {
             saves.Add(saveName);
             output = JsonConvert.SerializeObject(saves);
-            System.IO.File.WriteAllText(savesListPath, output);
+            File.WriteAllText(savesListPath, output);
             uim.UpdateSaves(saves);
         }
         Debug.Log("Data written.");
@@ -93,7 +93,7 @@ public class SaveManager : MonoBehaviour
     public GameState readGameStateFromFile(string saveName)
     {
         dataPath = Application.persistentDataPath + "/" + "game_save_" + saveName + ".json";
-        string jsonData = System.IO.File.ReadAllText(dataPath);
+        string jsonData = File.ReadAllText(dataPath);
         return JsonConvert.DeserializeObject<GameState>(jsonData);
     }
 
@@ -101,11 +101,11 @@ public class SaveManager : MonoBehaviour
     {
         if (saves.Contains(saveName))
         {
-            System.IO.File.Delete(Application.persistentDataPath + "/" + "game_save_" + saveName + ".json");
+            File.Delete(Application.persistentDataPath + "/" + "game_save_" + saveName + ".json");
             saves.Remove(saveName);
             uim.UpdateSaves(saves);
             string  output = JsonConvert.SerializeObject(saves);
-            System.IO.File.WriteAllText(savesListPath, output);
+            File.WriteAllText(savesListPath, output);
             uim.UpdateSaves(saves);
         }
     }

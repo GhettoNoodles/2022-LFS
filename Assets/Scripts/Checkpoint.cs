@@ -22,7 +22,7 @@ public class Checkpoint : MonoBehaviour
             AudioManager.Instance.CpActivate(cpAudioSrc);
             GameManager.Instance.SetActiveCP(this);
             particlesIdle= Instantiate(vfxIdle,position,Quaternion.identity);
-            particlesIdle= Instantiate(vfxSpawn,position,Quaternion.identity);
+            Instantiate(vfxSpawn,position,Quaternion.identity);
             isActive = true;
         }
     }
@@ -51,7 +51,7 @@ public class Checkpoint : MonoBehaviour
             isActive = true;
             prevCP.Deactivate();
             particlesIdle= Instantiate(vfxIdle,position,Quaternion.identity);
-            particlesIdle= Instantiate(vfxSpawn,position,Quaternion.identity);
+            Instantiate(vfxSpawn,position,Quaternion.identity);
         }
     }
 
@@ -60,7 +60,8 @@ public class Checkpoint : MonoBehaviour
         if (isActive)
         {
             isActive = false;
-            Destroy(particlesIdle); //cleans up particles
+            Destroy(particlesIdle);
+            Debug.Log("Destroyed");//cleans up particles
         }
         
     }
