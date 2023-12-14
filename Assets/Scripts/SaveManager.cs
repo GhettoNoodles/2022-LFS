@@ -7,16 +7,6 @@ using UnityEngine;
 using Newtonsoft.Json;
 using UnityEngine.Serialization;
 
-[Serializable]
-public class GameState
-{
-    [JsonProperty("active_cp")] public int activeCP;
-    [JsonProperty("ring_transforms")] public bool[] ringStates;
-    [JsonProperty("player_position")] public Vector3 playerPos;
-    [JsonProperty("player_velocity")] public Vector3 playerVelocity;
-    [JsonProperty("player_rings")] public int playerRings;
-    [JsonProperty("player_hp")] public int playerHP;
-}
 
 public class SaveManager : MonoBehaviour
 {
@@ -75,10 +65,9 @@ public class SaveManager : MonoBehaviour
         _gameState.playerVelocity = playVel;
         _gameState.playerRings = ringsCollected;
         _gameState.playerHP = playerHP;
-        string output = JsonConvert.SerializeObject(_gameState, new JsonSerializerSettings
-        {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-        });
+        
+        string output = JsonConvert.SerializeObject(_gameState);
+        
         File.WriteAllText(dataPath, output);
         if (!saves.Contains(saveName))
         {
